@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using Xunit;
 using JsonStudy.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace JsonStudy
 {
@@ -82,6 +83,79 @@ namespace JsonStudy
 
 
             Assert.True(true);
+        }
+
+        [Fact]
+        public void UNIXEpochTimestamps()
+        {
+            #region InputJson
+            string InputJson = 
+                @"{
+                      'responseData': {
+                        'time': '1509107180',
+                        '__class__': 'Time'
+                      },
+                      'requestClass': 'TimeService',
+                      'requestMethod': 'updateTime',
+                      'requestId': 13,
+                      '__class__': 'ServerResponse'
+                  }";
+            #endregion
+
+            // Convert to C# Class typed object
+            var response = JsonHelper.ToClass <ServerResponse_UpdateTime>(InputJson);
+
+            Assert.True(DateTime.TryParse("27.10.2017 15:26:20", out DateTime correctTime)); //{27.10.2017 15:26:20} Correct Local Time for 1509107180
+
+            Assert.NotNull(response);
+            Assert.Equal(correctTime, response.ResponseData.Time);
+
+            var json = JsonHelper.FromClass(response);
+            Assert.True(json.Contains("1509107180"));
+        }
+
+        [Fact]
+        public void FlatteningCollectionTypes()
+        {
+            #region InputJson
+            string InputJson =
+                @"
+                    {
+                      ""notes"": {
+                        ""note"": [
+                          {
+                            ""id"": ""72157613689748940"",
+                            ""author"": ""22994517@N02"",
+                            ""authorname"": ""morningbroken"",
+                            ""authorrealname"": """",
+                            ""authorispro"": 0,
+                            ""x"": ""227"",
+                            ""y"": ""172"",
+                            ""w"": ""66"",
+                            ""h"": ""31"",
+                            ""_content"": ""Maybe ~ I think  ...She is very happy .""
+                          },
+                          {
+                            ""id"": ""72157622673125344"",
+                            ""author"": ""40684115@N06"",
+                            ""authorname"": ""Suvcon"",
+                            ""authorrealname"": """",
+                            ""authorispro"": 0,
+                            ""x"": ""303"",
+                            ""y"": ""114"",
+                            ""w"": ""75"",
+                            ""h"": ""60"",
+                            ""_content"": ""this guy is different.""
+                          }
+                        ]
+                      }
+                    }
+                 ";
+            #endregion
+
+            var photo = JsonHelper.ToClass<Photo>(InputJson);
+
+            //var reverse = JsonHelper.FromClass(photo); // WriteJson isn't implemented
         }
     }
 }
